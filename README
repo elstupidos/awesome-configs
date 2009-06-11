@@ -1,0 +1,7 @@
+http://naquadah.awesome.org
+
+Awesome Window Manager 
+Config files following Awesome-git
+
+rc.lua - wrapper used to start awesome with default config
+awesomerc.lua - awesome configuration
