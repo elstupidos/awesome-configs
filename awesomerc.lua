@@ -1,6 +1,4 @@
---[[ Awesome Git awesomerc.lua
-     elstupidosawesome at gmail dot com --]]
-
+-- Awesome git config // elstupidosawesome at gmail dot com
  io.stderr:write("\n\rAwesome loaded at "..os.date("%B %d, %H:%M").."\r\n\n")
 
 -- Load libraries
@@ -10,13 +8,12 @@ require("naughty")
 
 -- {{{ Variable definitions
 theme_path = awful.util.getdir('config')..'/themes/grey/theme.lua' 
-
--- Actually load theme
 beautiful.init(theme_path)
 terminal = "urxvtc"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 modkey = "Mod4"
+use_titlebar = false
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 layouts =
@@ -41,7 +38,6 @@ floatapps =
 {
     -- by class
     ["MPlayer"] = true,
-    ["pinentry"] = true,
     ["gimp"] = true,
     -- by instance
     ["mocp"] = true
@@ -51,27 +47,24 @@ floatapps =
 -- Use the screen and tags indices.
 apptags =
 {
-    ["Vimpression"]   = { screen = 1, tag = 2 }, 
+    ["Vimpression"  ] = { screen = 1, tag = 2 }, 
     ["Gran Paradiso"] = { screen = 1, tag = 2 },
-    -- ["mocp"] = { screen = 2, tag = 4 },
 }
 
--- Define if we want to use titlebar on all applications.
-use_titlebar = false
 -- }}}
 
 -- {{{ Tags
 -- Define tags table.
 tags = {}
-tag_properties = { { name = "main", layout = layouts[1] },
-                   { name = "www" , layout = layouts[1], nmaster = 1 },
-                   { name = "dev" , layout = layouts[1], mwfact = 0.61, ncols = 2 },
-                   { name = "ssh" , layout = layouts[1] },
-                   { name = "misc", layout = layouts[10], nmaster = 0 }
+tag_properties = { { name = "main",   layout = layouts[1]                           },
+                   { name = "www" ,   layout = layouts[1], nmaster = 1              },
+                   { name = "dev" ,   layout = layouts[1], mwfact = 0.61, ncols = 2 },
+                   { name = "ssh" ,   layout = layouts[1]                           },
+                   { name = "misc",   layout = layouts[10], nmaster = 0             }
                  }
  
 for s = 1, screen.count() do
-    tags[s] = { }
+    tags[s] = {}
     for i, v in ipairs(tag_properties) do
         tags[s][i] = tag(v.name)
         tags[s][i].screen = s
@@ -117,6 +110,8 @@ end
 spacer = " "
 awesome_version = widget({ type = "textbox", name = "spacer_l", align = "left" })
 awesome_version.text = spacer..set_focus_foreground(" | <b><small> " .. awesome.release .. " </small></b> | ")
+spacer_r = widget({ type = "textbox", name = "spacer_r", align = "right" })
+spacer_r.text = "  "
 
 function escape(text)
     return awful.util.escape(text or 'nil')
@@ -263,8 +258,9 @@ end
 -- Create Volume textbox widget + add mouse wheel buttons for volume control
 volbox = widget({ type = 'textbox', align = 'right' })
 volbox:buttons({
-    button({ }, 4, function () awful.util.spawn("amixer -q sset Master 2dB+") end),
-    button({ }, 5, function () awful.util.spawn("amixer -q sset Master 2dB-") end)
+    button({ }, 1, function () awful.util.spawn("amixer -q sset Master toggle") end),
+    button({ }, 4, function () awful.util.spawn("amixer -q sset Master 2dB+")   end),
+    button({ }, 5, function () awful.util.spawn("amixer -q sset Master 2dB-")   end)
 })
 
 -- Create a systray
@@ -365,7 +361,7 @@ for s = 1, screen.count() do
     mypromptbox[s] = awful.widget.prompt({ align = "left" })
     -- Create an imagebox widget which will contains an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
-    mylayoutbox[s] = widget({ type = "imagebox", align = "right" })
+    mylayoutbox[s] = awful.widget.layoutbox(s, { align = "right" })
     mylayoutbox[s]:buttons(awful.util.table.join(
                            awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
                            awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
@@ -382,11 +378,18 @@ for s = 1, screen.count() do
     -- Create the wibox
     mywibox[s] = awful.wibox({ position = "top", fg = beautiful.fg_normal, bg = beautiful.bg_normal, screen = s })
     -- Add widgets to the wibox - order matters
-    mywibox[s].widgets = { mytaglist[s], awesome_version,
+    mywibox[s].widgets = { mytaglist[s], 
+                           awesome_version,
                            mytasklist[s],
                            mypromptbox[s],
-                           cpubox, loadbox, membox, clockwidget,volbox, 
+                           cpubox,
+                           loadbox,
+                           membox,
+                           clockwidget,
+                           spacer_r, 
+                           volbox,
                            s == 1 and mysystray or nil, 
+                           spacer_r,
                            mylayoutbox[s] }
     mywibox[s].screen = s
 end
@@ -619,19 +622,11 @@ awful.hooks.manage.register(function (c, startup)
      c.size_hints_honor = false
 end)
 
--- Hook function to execute when arranging the screen.
--- (tag switch, new client, etc)
-awful.hooks.arrange.register(function (screen)
-    local layout = awful.layout.getname(awful.layout.get(screen))
-    if layout and beautiful["layout_" ..layout] then
-        mylayoutbox[screen].image = image(beautiful["layout_" .. layout])
-    else
-        mylayoutbox[screen].image = nil
-    end
-
+-- Hook function to execute when switching tag selection.
+awful.hooks.tags.register(function (screen, tag, view)
     -- Give focus to the latest client in history if no window has focus
     -- or if the current window is a desktop or a dock one.
-    if not client.focus then
+    if not client.focus or not client.focus:isvisible() then
         local c = awful.client.focus.history.get(screen, 0)
         if c then client.focus = c end
     end
