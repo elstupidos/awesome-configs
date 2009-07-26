@@ -48,7 +48,7 @@ floatapps =
 apptags =
 {
     ["Vimpression"  ] = { screen = 1, tag = 2 }, 
-    ["Gran Paradiso"] = { screen = 1, tag = 2 },
+    ["Shiretoko"] = { screen = 1, tag = 2 },
 }
 
 -- }}}
@@ -108,9 +108,9 @@ end
 -- {{{ Widgets
 -- Spacers
 spacer = " "
-awesome_version = widget({ type = "textbox", name = "spacer_l", align = "left" })
+awesome_version = widget({ type = "textbox", name = "spacer_l" })
 awesome_version.text = spacer..set_focus_foreground(" | <b><small> " .. awesome.release .. " </small></b> | ")
-spacer_r = widget({ type = "textbox", name = "spacer_r", align = "right" })
+spacer_r = widget({ type = "textbox", name = "spacer_r" })
 spacer_r.text = "  "
 
 function escape(text)
@@ -177,7 +177,7 @@ function loadavg(widget)
 end
 
 -- Create Loadavg textbox widget
-loadbox = widget({ type = 'textbox', align = 'right' })
+loadbox = widget({ type = 'textbox' })
 
 -- Cpu/Temp Function
 function cpu(widget)
@@ -204,7 +204,7 @@ function cpu(widget)
 end
 
 -- Create Cpu/Temp textbox widget
-cpubox = widget({ type = 'textbox', align = 'right' })
+cpubox = widget({ type = 'textbox' })
 
 -- Memory Function 
 function memory(widget)
@@ -229,7 +229,7 @@ function memory(widget)
 end
 
 -- Create Memory textbox widget
-membox = widget({ type = 'textbox', align = 'right' })
+membox = widget({ type = 'textbox' })
 
 -- Clock Function
 function clock_info(dateformat, timeformat)
@@ -240,7 +240,7 @@ function clock_info(dateformat, timeformat)
 end
 
 -- Create Clock textbox widget
-clockwidget = widget({ type = "textbox", align = "right" })
+clockwidget = widget({ type = "textbox" })
 
 -- Volume Function
 function volume(widget, mixer)
@@ -264,7 +264,7 @@ volbox:buttons({
 })
 
 -- Create a systray
-mysystray = widget({ type = "systray", align = "right" })
+mysystray = widget({ type = "systray" })
 
 -- }}}
 
@@ -358,10 +358,10 @@ mytasklist.buttons = awful.util.table.join(
 
 for s = 1, screen.count() do
     -- Create a promptbox for each screen
-    mypromptbox[s] = awful.widget.prompt({ align = "left" })
-    -- Create an imagebox widget which will contains an icon indicating which layout we're using.
+    mypromptbox[s] = awful.widget.prompt({ layout = awful.widget.layout.leftright })
+     -- Create an imagebox widget which will contains an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
-    mylayoutbox[s] = awful.widget.layoutbox(s, { align = "right" })
+    mylayoutbox[s] = awful.widget.layoutbox(s)
     mylayoutbox[s]:buttons(awful.util.table.join(
                            awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
                            awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
@@ -378,20 +378,23 @@ for s = 1, screen.count() do
     -- Create the wibox
     mywibox[s] = awful.wibox({ position = "top", fg = beautiful.fg_normal, bg = beautiful.bg_normal, screen = s })
     -- Add widgets to the wibox - order matters
-    mywibox[s].widgets = { mytaglist[s], 
-                           awesome_version,
-                           mytasklist[s],
-                           mypromptbox[s],
-                           cpubox,
-                           loadbox,
-                           membox,
-                           clockwidget,
-                           spacer_r, 
-                           volbox,
-                           s == 1 and mysystray or nil, 
-                           spacer_r,
-                           mylayoutbox[s] }
-    mywibox[s].screen = s
+    mywibox[s].widgets = {
+        { 
+            mytaglist[s], 
+            awesome_version,
+            mypromptbox[s],
+            layout = awful.widget.layout.horizontal.leftright
+        },
+            mylayoutbox[s],
+            s == 1 and mysystray or nil, 
+            volbox,
+            clockwidget,
+            membox,
+            loadbox,
+            cpubox,
+            mytasklist[s],
+            layout = awful.widget.layout.horizontal.rightleft
+        }
 end
 -- }}}
 
