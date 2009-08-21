@@ -1,10 +1,9 @@
--- Awesome git config // elstupidosawesome at gmail dot com
- io.stderr:write("\n\rAwesome loaded at "..os.date("%B %d, %H:%M").."\r\n\n")
-
--- Load libraries
+-- Awesome-git rc.lua // 05AUG09 // elstupidosawesome at gmail.com
+io.stderr:write("\n\rAwesome loaded at "..os.date("%B %d, %H:%M").."\r\n\n")
 require("awful")
 require("beautiful")
 require("naughty")
+require("obvious") -- Obvious Widgets git://git.mercenariesguild.net/obvious.git
 
 -- {{{ Variable definitions
 theme_path = awful.util.getdir('config')..'/themes/grey/theme.lua' 
@@ -13,7 +12,6 @@ terminal = "urxvtc"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 modkey = "Mod4"
-use_titlebar = false
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 layouts =
@@ -38,6 +36,7 @@ floatapps =
 {
     -- by class
     ["MPlayer"] = true,
+    ["pinentry"] = true,
     ["gimp"] = true,
     -- by instance
     ["mocp"] = true
@@ -47,14 +46,15 @@ floatapps =
 -- Use the screen and tags indices.
 apptags =
 {
-    ["Vimpression"  ] = { screen = 1, tag = 2 }, 
-    ["Shiretoko"] = { screen = 1, tag = 2 },
+    -- ["Firefox"] = { screen = 1, tag = 2 },
+    -- ["mocp"] = { screen = 2, tag = 4 },
 }
 
+-- Define if we want to use titlebar on all applications.
+use_titlebar = false
 -- }}}
 
 -- {{{ Tags
--- Define tags table.
 tags = {}
 tag_properties = { { name = "main",   layout = layouts[1]                           },
                    { name = "www" ,   layout = layouts[1], nmaster = 1              },
@@ -76,7 +76,6 @@ for s = 1, screen.count() do
     end
     tags[s][1].selected = true
 end
-
 -- }}}
 
 -- {{{ Markup
@@ -105,12 +104,12 @@ function set_fg(fgcolor, text)
 end
 -- }}}
 
--- {{{ Widgets
+-- {{{ Wibox Widgets
 -- Spacers
 spacer = " "
-awesome_version = widget({ type = "textbox", name = "spacer_l", align = "left" })
+awesome_version = widget({ type = "textbox", name = "spacer_l" })
 awesome_version.text = spacer..set_focus_foreground(" | <b><small> " .. awesome.release .. " </small></b> | ")
-spacer_r = widget({ type = "textbox", name = "spacer_r", align = "right" })
+spacer_r = widget({ type = "textbox", name = "spacer_r" })
 spacer_r.text = "  "
 
 function escape(text)
@@ -177,7 +176,7 @@ function loadavg(widget)
 end
 
 -- Create Loadavg textbox widget
-loadbox = widget({ type = 'textbox', align = 'right' })
+loadbox = widget({ type = 'textbox' })
 
 -- Cpu/Temp Function
 function cpu(widget)
@@ -200,11 +199,11 @@ function cpu(widget)
         gov[i] = fread('/sys/devices/system/cpu/cpu'..i..'/cpufreq/scaling_governor'):gsub("\n", '')
     end
  
-    widget.text = spacer..freq[1]..'MHz ('..gov[0]..') @ '..temperature..'C'..set_fg('#4C4C4C', ' |')
+    widget.text = set_fg('#4c4c4c', ' |')..spacer..freq[1]..'MHz ('..gov[0]..') @ '..temperature..'C'..set_fg('#4C4C4C', ' |')
 end
 
 -- Create Cpu/Temp textbox widget
-cpubox = widget({ type = 'textbox', align = 'right' })
+cpubox = widget({ type = 'textbox' })
 
 -- Memory Function 
 function memory(widget)
@@ -229,7 +228,7 @@ function memory(widget)
 end
 
 -- Create Memory textbox widget
-membox = widget({ type = 'textbox', align = 'right' })
+membox = widget({ type = 'textbox' })
 
 -- Clock Function
 function clock_info(dateformat, timeformat)
@@ -240,45 +239,11 @@ function clock_info(dateformat, timeformat)
 end
 
 -- Create Clock textbox widget
-clockwidget = widget({ type = "textbox", align = "right" })
-
--- Volume Function
-function volume(widget, mixer)
-    local vol = ''
-    local txt = pread('amixer get '..mixer)
-    if txt:match('%[off%]') then
-        vol = 'Mute'
-    else
-        vol = txt:match('%[(%d+%%)%]')
-    end
- 
-    widget.text = '['..vol..'] '
-end
-
--- Create Volume textbox widget + add mouse wheel buttons for volume control
-volbox = widget({ type = 'textbox', align = 'right' })
-volbox:buttons({
-    button({ }, 1, function () awful.util.spawn("amixer -q sset Master toggle") end),
-    button({ }, 4, function () awful.util.spawn("amixer -q sset Master 2dB+")   end),
-    button({ }, 5, function () awful.util.spawn("amixer -q sset Master 2dB-")   end)
-})
-
--- Create a systray
-mysystray = widget({ type = "systray", align = "right" })
+clockwidget = widget({ type = "textbox" })
 
 -- }}}
 
--- {{{ Menu
--- Program Variables
-browser1 = "firefox"
-browser2 = "vimpression"
-dropbox  = "sudo /etc/rc.d/dropboxd start"
-fileManager = "pcmanfm"
-archmount = "archmount"
-archunmount = "archunmount"
-adminshutdown = "sudo shutdown -h now"
-adminreboot = "sudo reboot"
-
+-- {{{ Wibox
 -- Create a laucher widget and a main menu
 myawesomemenu = {
    { "manual", terminal .. " -e man awesome" },
@@ -287,36 +252,17 @@ myawesomemenu = {
    { "quit", awesome.quit }
 }
 
-powermenu = {
-    { "reboot",   adminreboot      },
-    { "shutdown", adminshutdown    }
-}
-
-adminmenu = {
-    { "mnt arch",    archmount     },
-    { "umnt arch",   archunmount   },
-    { "power",       powermenu     }
-}
-
-netmenu = { 
-    { "firefox", browser1 },
-    { "vimpression", browser2 }
-}
-
-mymainmenu = awful.menu.new({ items = { { "awesome",   myawesomemenu },
-                                        { "net apps",  netmenu       },
-                                        { "admin",     adminmenu     },
-                                        { "dropbox",   dropbox       },
-                                        { "pcmanfm",   fileManager   },
-                                        { "terminal",  terminal      }
-                                      }
-                            })
+mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
+                                    { "open terminal", terminal }
+                                  }
+                        })
 
 mylauncher = awful.widget.launcher({ image = image(beautiful.awesome_icon),
                                      menu = mymainmenu })
--- }}}
-                                     
--- {{{ Wibox
+
+-- Create a systray
+mysystray = widget({ type = "systray" })
+
 -- Create a wibox for each screen and add it
 mywibox = {}
 mypromptbox = {}
@@ -358,17 +304,17 @@ mytasklist.buttons = awful.util.table.join(
 
 for s = 1, screen.count() do
     -- Create a promptbox for each screen
-    mypromptbox[s] = awful.widget.prompt({ align = "left" })
+    mypromptbox[s] = awful.widget.prompt({ layout = awful.widget.layout.leftright })
     -- Create an imagebox widget which will contains an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
-    mylayoutbox[s] = awful.widget.layoutbox(s, { align = "right" })
+    mylayoutbox[s] = awful.widget.layoutbox(s)
     mylayoutbox[s]:buttons(awful.util.table.join(
                            awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
                            awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
                            awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
                            awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end)))
     -- Create a taglist widget
-    mytaglist[s] = awful.widget.taglist(s, awful.widget.taglist.label.noempty, mytaglist.buttons)
+    mytaglist[s] = awful.widget.taglist(s, awful.widget.taglist.label.all, mytaglist.buttons)
 
     -- Create a tasklist widget
     mytasklist[s] = awful.widget.tasklist(function(c)
@@ -376,20 +322,27 @@ for s = 1, screen.count() do
                                           end, mytasklist.buttons)
 
     -- Create the wibox
-    mywibox[s] = awful.wibox({ position = "top", fg = beautiful.fg_normal, bg = beautiful.bg_normal, screen = s })
+    mywibox[s] = awful.wibox({ position = "top", screen = s })
     -- Add widgets to the wibox - order matters
-    mywibox[s].widgets = { mytaglist[s], 
-                           awesome_version,
-                           mytasklist[s],
-                           mypromptbox[s],
-                           cpubox,
-                           loadbox,
-                           membox,
-                           clockwidget,
-                           volbox,
-                           s == 1 and mysystray or nil, 
-                           mylayoutbox[s] }
-    mywibox[s].screen = s
+    mywibox[s].widgets = {
+        {
+            mytaglist[s],
+            awesome_version,
+            mypromptbox[s],
+            layout = awful.widget.layout.horizontal.leftright
+        },
+        mylayoutbox[s],
+        s == 1 and mysystray or nil,
+        obvious.volume_alsa(),
+        spacer_r,
+        clockwidget,
+        membox,
+        loadbox,
+        cpubox, spacer_r,
+        obvious.basic_mpd(),
+        mytasklist[s],
+        layout = awful.widget.layout.horizontal.rightleft
+    }
 end
 -- }}}
 
@@ -611,13 +564,13 @@ awful.hooks.manage.register(function (c, startup)
 
     -- Set the windows at the slave,
     -- i.e. put it at the end of others instead of setting it master.
-     awful.client.setslave(c)
-    
-    -- New floating windows don't cover the statusbar and don't overlap until it's unavoidable
-     awful.placement.no_offscreen(c)
+    awful.client.setslave(c)
 
     -- Honor size hints: if you want to drop the gaps between windows, set this to false.
-     c.size_hints_honor = false
+    c.size_hints_honor = false
+
+    -- New floating windows don't cover the statusbar and don't overlap until it's unavoidable
+    awful.placement.no_offscreen(c)
 end)
 
 -- Hook function to execute when switching tag selection.
@@ -633,7 +586,6 @@ end)
 -- Run Widget functions once to display immediately
 clock_info("%d.%b.%Y", "%H:%M")
 memory(membox)
-volume(volbox, 'Master')
 cpu(cpubox)
 loadavg(loadbox)
 
@@ -646,7 +598,6 @@ end)
 -- 20 seconds
 awful.hooks.timer.register(20, function ()
     memory(membox)
-    volume(volbox, 'Master')
 end)
 
 -- 10 seconds
@@ -654,4 +605,5 @@ awful.hooks.timer.register(10, function ()
     cpu(cpubox)
     loadavg(loadbox)
 end)
--- }}} 
+
+-- }}}
