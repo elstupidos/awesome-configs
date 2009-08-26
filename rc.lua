@@ -1,3 +1,6 @@
+-- Awesome wrapper by MattJ
+-- Loads default rc.lua as failback
+
 local rc, err = loadfile(os.getenv("HOME").."/.config/awesome/awesomerc.lua");
 if rc then
   rc, err = pcall(rc);
