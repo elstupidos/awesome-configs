@@ -35,11 +35,11 @@ layouts =
 tags = {}
 for s = 1, screen.count() do
     -- Each screen has its own tag table.
-    tags[s] = awful.tag({ "main", "www", "dev", 4, 5, 6, 7, "ssh", "misc" }, s)
+    tags[s] = awful.tag({"main", "www", "dev", 4, 5, 6, 7, "ssh", "misc" }, s, layouts[1])
 end
 -- }}}
 
--- {{{ Widgets 
+-- {{{ Functions | Widgets | Timers 
 spacer = " "
 
 -- Markup 
@@ -113,9 +113,6 @@ function cpu(widget)
     widget.text = spacer..freq[1]..'MHz ('..gov[0]..') @ '..temperature..'C'..set_fg('#4C4C4C', ' |')
 end
 
--- Create Cpu/Temp textbox widget
-cpubox = widget({ type = 'textbox' })
-
 -- Loadavg Function
 function loadavg(widget)
     local palette =
@@ -147,9 +144,6 @@ function loadavg(widget)
     widget.text = spacer..set_fg(color, loadtext)..set_fg('#4C4C4C', ' |')
 end
 
--- Create Loadavg textbox widget
-loadbox = widget({ type = 'textbox' })
-
 -- Memory Function 
 function memory(widget)
     local memfile = io.open('/proc/meminfo')
@@ -172,15 +166,17 @@ function memory(widget)
     widget.text = spacer..mem_in_use..'mb'..set_fg('#4C4C4C', ' |')
 end
 
--- Create Memory textbox widget
-membox = widget({ type = 'textbox' })
+-- Create textbox widgets to be added to wibox
+membox   = widget({ type = 'textbox' })
+loadbox  = widget({ type = 'textbox' })
+cpubox   = widget({ type = 'textbox' })
 
--- Run widgets once to display immediately
+-- Run functions once to display in textbox widgets
 memory(membox)
 loadavg(loadbox)
 cpu(cpubox)
 
--- Update Widgets
+-- Update Widgets every 20 secs / 10 secs
 function hook_20s ()
     memory(membox)
 end
@@ -192,7 +188,7 @@ function hook_10s ()
 end
 hook_10s()
 
--- Update Timers
+-- Timers
 timers = {
   { t = 10,    f = hook_10s   },
   { t = 20,    f = hook_20s   },
@@ -219,7 +215,7 @@ myawesomemenu = {
 }
 
 mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "terminal", terminal }
+                                    { "open terminal", terminal }
                                   }
                         })
 
@@ -237,7 +233,7 @@ mytaglist = {}
 mytaglist.buttons = awful.util.table.join(
                     awful.button({ }, 1, awful.tag.viewonly),
                     awful.button({ modkey }, 1, awful.client.movetotag),
-                    awful.button({ }, 3, function (tag) tag.selected = not tag.selected end),
+                    awful.button({ }, 3, awful.tag.viewtoggle),
                     awful.button({ modkey }, 3, awful.client.toggletag),
                     awful.button({ }, 4, awful.tag.viewnext),
                     awful.button({ }, 5, awful.tag.viewprev)
@@ -270,7 +266,7 @@ mytasklist.buttons = awful.util.table.join(
 
 for s = 1, screen.count() do
     -- Create a promptbox for each screen
-    mypromptbox[s] = awful.widget.prompt({ layout = awful.widget.layout.leftright })
+    mypromptbox[s] = awful.widget.prompt({ layout = awful.widget.layout.horizontal.leftright })
     -- Create an imagebox widget which will contains an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
     mylayoutbox[s] = awful.widget.layoutbox(s)
@@ -298,7 +294,7 @@ for s = 1, screen.count() do
             layout = awful.widget.layout.horizontal.leftright
         },
         mylayoutbox[s],
-        s == 1 and mysystray or nil,
+        s == 1 and mysystray or nil, textbox(" "),
         obvious.volume_alsa():set_layout(awful.widget.layout.horizontal.rightleft), 
         textbox("  "), mytextclock,
         membox, loadbox, s == 1 and cpubox,
@@ -409,7 +405,7 @@ for i = 1, keynumber do
                   function ()
                       local screen = mouse.screen
                       if tags[screen][i] then
-                          tags[screen][i].selected = not tags[screen][i].selected
+                          awful.tag.viewtoggle(tags[screen][i])
                       end
                   end),
         awful.key({ modkey, "Shift" }, i,
@@ -450,9 +446,8 @@ awful.rules.rules = {
       properties = { floating = true } },
     { rule = { class = "gimp" },
       properties = { floating = true } },
-    -- Set Firefox to always map on tags number 2 of screen 1.
-     { rule = { instance = "Shiretoko" },
-       properties = { tag = tags[1][2] } },
+    { rule = { instance = "Shiretoko" },
+      properties = { tag = tags[1][2] } },
 }
 -- }}}
 
