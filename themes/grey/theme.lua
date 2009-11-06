@@ -8,13 +8,13 @@ theme.font          = "sans bold 7"
 
 theme.bg_normal     = "#0a0a0a"
 theme.bg_focus      = "#0a0a0a"
-theme.bg_urgent     = "#ff0000"
+theme.bg_urgent     = "#0a0a0a"
 theme.bg_minimize   = "#444444"
 
 theme.fg_normal     = "#aaaaaa"
 theme.fg_focus      = "#ffffff"
-theme.fg_urgent     = "#ffffff"
-theme.fg_minimize  = "#ffffff"
+theme.fg_urgent     = "#91231c"
+theme.fg_minimize   = "#ffffff"
 
 theme.border_width  = "1"
 theme.border_normal = "#000000"
@@ -42,7 +42,7 @@ theme.tasklist_floating_icon  = "/usr/share/awesome/themes/sky/layouts/floating.
 -- menu_[bg|fg]_[normal|focus]
 -- menu_[border_color|border_width]
 theme.menu_submenu_icon = "/usr/share/awesome/themes/default/submenu.png"
-theme.menu_height   = "20"
+theme.menu_height   = "15"
 theme.menu_width    = "100"
 
 -- You can add as many variables as
