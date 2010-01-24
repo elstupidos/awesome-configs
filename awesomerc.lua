@@ -1,4 +1,4 @@
--- Awesome Git  01 NOV 09 
+-- Awesome Git 
 io.stderr:write("\n\r::: Awesome Loaded @ ", os.date(), " :::\r\n")
 
 -- Awesome library
@@ -10,7 +10,7 @@ require("naughty")
 require("obvious.volume_alsa")
 
 -- {{{ Variable definitions
-beautiful.init("/home/sammy/.config/awesome/themes/grey/theme.lua")
+beautiful.init("/home/sammy/.config/awesome/themes/greyscale/theme.lua")
 terminal = "urxvtc"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
@@ -122,16 +122,8 @@ end
 function loadavg(widget)
     local palette =
     {
-        "#888888",
-        "#999988",
-        "#AAAA88",
-        "#BBBB88",
-        "#CCCC88",
-        "#CCBB88",
-        "#CCAA88",
-        "#DD9988",
-        "#EE8888",
-        "#FF4444",
+        "#888888", "#999988", "#AAAA88", "#BBBB88", "#CCCC88",
+        "#CCBB88", "#CCAA88", "#DD9988", "#EE8888", "#FF4444",
     }
     local txt = fread('/proc/loadavg')
     if type(txt) == 'string' then
