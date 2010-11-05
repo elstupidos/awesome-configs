@@ -8,6 +8,7 @@ require("wibox")
 require("beautiful")
 -- Notification library
 require("naughty")
+require("obvious.volume_alsa")
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
@@ -55,14 +56,15 @@ end
 -- {{{ Menu
 -- Create a laucher widget and a main menu
 myawesomemenu = {
-   { "manual", terminal .. " -e man awesome" },
    { "edit config", editor_cmd .. " " .. awful.util.getdir("config") .. "/awesomerc.lua" },
+   { "test config", terminal .. " -e awesome_test"},
+   { "manual", terminal .. " -e man awesome" },
    { "restart", awesome.restart },
    { "quit", awesome.quit }
 }
 
 mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "open terminal", terminal }
+                                    { "terminal", terminal }
                                   }
                         })
 
@@ -157,7 +159,7 @@ function memory(widget)
     local mem_in_use = mem_total - (mem_free + mem_buffers + mem_cached)
     local mem_usage_percentage = math.floor(mem_in_use / mem_total * 100)
     
-    widget:set_markup(set_fg('#C0C0C0', 'Mem:')..mem_in_use..'mb'..'['..mem_usage_percentage..'%]'..spacer)
+    widget:set_markup(set_fg('#C0C0C0', 'Mem:')..mem_in_use..'mb'..'['..mem_usage_percentage..'%]')
  
 end
 
@@ -253,7 +255,7 @@ for s = 1, screen.count() do
     -- Widgets that are aligned to the left
     local left_layout = wibox.layout.fixed.horizontal()
     left_layout:add(mytaglist[s])
-    left_layout:add(textbox(set_fg('#C0C0C0', " | manhattan | ")))
+    left_layout:add(textbox(set_fg('#C0C0C0', " >> ")))
     left_layout:add(mypromptbox[s])
 
     -- Widgets that are aligned to the right
@@ -262,6 +264,8 @@ for s = 1, screen.count() do
     right_layout:add(membox)
     if s == 1 then right_layout:add(wibox.widget.systray(true)) end
     right_layout:add(mytextclock)
+    right_layout:add(obvious.volume_alsa())
+    right_layout:add(textbox(" "))
     right_layout:add(mylayoutbox[s])
 
     -- Now bring it all together (with the tasklist in the middle)
